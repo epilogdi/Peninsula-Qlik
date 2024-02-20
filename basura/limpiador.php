@@ -5,6 +5,25 @@ include $server."/vendor/autoload.php";
 include $server."/includes/mysqli.php";
 include $server."/includes/mongo.php";
 
+
+function cleanModule($module,$origin,$destination){
+  global $mongoClient;
+  $mongoClient->$destination->$module->drop();
+  $items = $mongoClient->$origin->$module->find();
+  foreach ($items as $item) {
+    $item=removeTrash($item);
+    $mongoClient->$destination->$module->insertOne($item);   
+  }
+}
+
+$admin="0-Admin";
+$collections = $mongoClient->$admin->Modules->find(["enabled"=>true]);  
+foreach ($collections as $collection) {
+  cleanModule($collection->name,"1-Descargas","2-Limpiados");
+}
+
+
+
 $collections = $mongoClient->Descargados->listCollections();
 foreach ($collections as $collection) {
   $module = $collection["name"];
@@ -16,61 +35,9 @@ foreach ($collections as $collection) {
   }
 }
 
-function procesarPotentials(){
-  global $mongoClient;
-  global Descargados;
-
-  $condition = [
-    '$and' => [
-      [
-        "InmuebleX" => null,
-        "LeadX" => null,
-        "Contact_NameX" => null
-      ]
-    ]
-  ];
 
 
-  $items = $mongoClient->Descargados->Potentials->find();
-  //$items = $mongoClient->Descargados->Potentials->find(['id' => "5153690000031344080"]);
-  foreach ($items as $item) {
-    $producto = getProducto($item->Inmueble->id);
-    $lead = getLead($item->Lead->id);
-    $contact = getContact($item->Contact_Name->id);
-    $mongoClient->Descargados->Potentials->updateOne(
-      [ 'id' => $item->id ],
-      [ '$set' => ['InmuebleX' => $producto, 'LeadX' => $lead, 'Contact_NameX' => $contact ]],
-      ["upsert" => true, "multiple" => true]
-    );
-    echo $item->Potentials->id."<br>";
-  }
-  /*$items=$mongoClient->Descargados->Potentials->find(['id' => "5153690000031344080"]);
-  foreach ($items as $item) {
-    echo json_encode($item);
-  }*/
 
-
-}
-
-function getProducto($id){
-  global $mongoClient;
-  $items = $mongoClient->Descargados->Products->find(['id' => $id]);
-  foreach ($items as $item) {
-    return removeTrash($item);
-  }
-}
-
-function procesarProductos(){
-  global $mongoClient;
-  $items = $mongoClient->Descargados->Products->find(["DesarrolloX" => null]);
-  foreach ($items as $item) {
-    $desarrollo = getDesarrollo($item->Desarrollo->id);
-    $mongoClient->Descargados->Products->updateOne(
-      [ 'id' => $item->id ],
-      [ '$set' => [ 'DesarrolloX' => $desarrollo ]]
-    );
-  }
-}
 
 function getDesarrollo($id){
   global $mongoClient;
