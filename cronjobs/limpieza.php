@@ -19,13 +19,7 @@ $remove = [
   '$process_flow' =>  [],
   '$review' =>  [],
   '$review_process' =>  [],
-  '$state' =>  [],
-  'Created_By' =>  [],
-  'Created_Time' =>  [],
-  'Last_Activity_Time' =>  [],
-  'Modified_By' =>  [],
-  'Modified_Time' =>  [],
-  'Owner' =>  [],
+  '$state' =>  [], 
   'Tag' =>  [],
   '$zia_owner_assignment' =>  [],
   'Locked__s' =>  [],
@@ -38,7 +32,7 @@ $remove = [
 
 ];
 
-$dbOrigin="ZohoCRM";
+$dbOrigin="2_limpiados";
 $admin="0-Admin";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
@@ -59,7 +53,7 @@ foreach ($collections as $collection) {
   );
   
   $mongoClient->$dbOrigin->$module->aggregate(
-    [['$out' => ['db' => 'Consolidados', 'coll' => $module]]]
+    [['$out' => ['db' => '3-Consolidados', 'coll' => $module]]]
   );
 }
 

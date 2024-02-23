@@ -85,7 +85,7 @@ $dateStart = date('Y-m-d H:i:s');
 $collections = $mongoClient->$admin->Modules->find(["enabled"=>true]);  
 foreach ($collections as $collection) {
   $collectionName = $collection->name;
-  $descargados = downloadModule($collectionName,"ZohoCRM"); 
+  $descargados = downloadModule($collectionName,"2-Limpiados"); 
 }
 
 $cron = new stdClass();
