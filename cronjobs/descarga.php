@@ -4,7 +4,12 @@ include "/opt/bitnami/apache2/htdocs/ZohoCRM/develop/vendor/autoload.php";
 include "/opt/bitnami/apache2/htdocs/ZohoCRM/develop/includes/mongo.php";
 
 
+
 function getNewZohoToken(){
+  global $ENV_ZOHO_REFRESH_TOKEN;
+  global $ENV_ZOHO_CLIENT_ID;
+  global $ENV_ZOHO_CLIENT_SECRET;
+
   $client = new GuzzleHttp\Client();
   $headers = [
     "Content-Type" => "application/x-www-form-urlencoded",
@@ -12,9 +17,9 @@ function getNewZohoToken(){
   ];
   $options = [
     "form_params" => [
-      "refresh_token" => "1000.e1dc5d526ecacb5675e12fbfa4afff16.e3f64890f8f5e766951c565f9d131276",
-      "client_id" => "1000.MU60VJ3MUFSK19RHE1BB1CM4Y204CW",
-      "client_secret" => "a677f065794be7c9e99a7e26350aa15cbee8d6cea3",
+      "refresh_token" => "$ENV_ZOHO_REFRESH_TOKEN",
+      "client_id" => "$ENV_ZOHO_CLIENT_ID",
+      "client_secret" => "$ENV_ZOHO_CLIENT_SECRET", 
       "grant_type" => "refresh_token"
     ]];
   $request = new \GuzzleHttp\Psr7\Request("POST", "https://accounts.zoho.com/oauth/v2/token", $headers);
@@ -46,46 +51,46 @@ function getLastValidToken(){
   return $token;
 }
 
-function getResponseFromModule($module, $page){
+function storeResponseFromModule($collectionName){ 
+  global $mongoClient;
+  global $destination;
+  global $page;
   $client = new GuzzleHttp\Client();
   $token = getLastValidToken();
-
   $headers = [
     "Authorization" => "Zoho-oauthtoken $token->access_token"
   ];
+  $request = new \GuzzleHttp\Psr7\Request("GET", "https://www.zohoapis.com/crm/v2/$collectionName?page=$page", $headers);
 
-  $request = new \GuzzleHttp\Psr7\Request("GET", "https://www.zohoapis.com/crm/v2/$module?page=$page", $headers);
-  $response = $client->sendAsync($request)->wait();
-  $response = json_decode($response->getBody());
-  return $response;
-}
-
-function downloadModule($module,$database){
-  global $mongoClient;
-  $mongoClient->$database->$module->drop();
-  $moreRecords = true;
-  $total=0;
-  $page=1;
-  while ($moreRecords) {
-    $response = getResponseFromModule($module, $page);
-    $moreRecords = $response->info->more_records;
-    $records = $response->data;
-    $total += sizeof($records);
-    $collection=$mongoClient->$database->$module->insertMany($records);
-    $page++;
+  try {
+    $response = $client->sendAsync($request)->wait();
+    $response = json_decode($response->getBody());
+    $records = (property_exists($response, 'users'))?$response->users:$response->data;
+    $mongoClient->$destination->$collectionName->insertMany($records);
+    if($response->info->more_records==true){   
+      $page++;
+      storeResponseFromModule($collectionName);
+    }
+  } catch (Exception $e) {
+    
+    error_log("Caught exception:". $e->getMessage());
   }
-  return $total;
+
 }
+
 
 $admin="0-Admin";
+$destination = "ZohoCRM";
 
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
 $collections = $mongoClient->$admin->Modules->find(["enabled"=>true]);  
 foreach ($collections as $collection) {
+  $page=1;
   $collectionName = $collection->name;
-  $descargados = downloadModule($collectionName,"2-Limpiados"); 
+  $mongoClient->$destination->$collectionName->drop();
+  storeResponseFromModule($collectionName);
 }
 
 $cron = new stdClass();

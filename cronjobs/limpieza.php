@@ -32,28 +32,28 @@ $remove = [
 
 ];
 
-$dbOrigin="2_limpiados";
-$admin="0-Admin";
+$destination = "ZohoCRM";
+$admin = "0-Admin";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
-$collections = $mongoClient->$admin->Modules->find(["enabled"=>true]);  
+$collections = $mongoClient->$destination->listCollections(); 
 foreach ($collections as $collection) {
-  $module = $collection->name;  
- 
-  $mongoClient->$dbOrigin->$module->updateMany(
+  $module =  $collection["name"];
+
+  $mongoClient->$destination->$module->updateMany(
     [],
     [['$addFields' => ['createdDateParts' => ['$dateToParts' => ['date' => ['$dateFromString' => ['dateString' => '$Created_Time']]]], 'createdFullDate' => ['$toDate' => ['$dateFromString' => ['dateString' => '$Created_Time']]], 'createdDate' => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => ['$dateFromString' => ['dateString' => '$Created_Time']]]]]]],
     ['multiple' => true]
   );
-  
-  $mongoClient->$dbOrigin->$module->updateMany(
+
+  $mongoClient->$destination->$module->updateMany(
     [],
     ['$unset' => $remove],
     ['multiple' => true]
   );
-  
-  $mongoClient->$dbOrigin->$module->aggregate(
-    [['$out' => ['db' => '3-Consolidados', 'coll' => $module]]]
+
+  $mongoClient->$destination->$module->aggregate(
+    [['$out' => ['db' => 'ZohoCRM-Consolidados', 'coll' => $module]]]
   );
 }
 
