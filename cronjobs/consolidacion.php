@@ -17,7 +17,6 @@ $mongoClient->$dbOrigin->Products->aggregate(
 );
 $mongoClient->$dbOrigin->Desarrollos->drop();
 
-
 //SE BUSCA EL INMUEBLE DE CADA DEAL
 $mongoClient->$dbOrigin->Deals->aggregate(
   [
@@ -25,8 +24,8 @@ $mongoClient->$dbOrigin->Deals->aggregate(
     ['$merge' => ['into' => 'Deals', 'whenMatched' => 'replace', 'whenNotMatched' => 'discard']],
   ]
 );
-$mongoClient->$dbOrigin->Products->drop();
 
+$mongoClient->$dbOrigin->Products->drop();
 
 //SE BUSCA EL CONTACTO DE CADA DEAL
 $mongoClient->$dbOrigin->Deals->aggregate(
@@ -35,6 +34,7 @@ $mongoClient->$dbOrigin->Deals->aggregate(
     ['$merge' => ['into' => 'Deals', 'whenMatched' => 'replace', 'whenNotMatched' => 'discard']],
   ]
 );
+
 $mongoClient->$dbOrigin->Contacts->drop();
 
 //SE BUSCA EL BROKER DE CADA DEAL
@@ -44,6 +44,7 @@ $mongoClient->$dbOrigin->Leads->aggregate(
     ['$merge' => ['into' => 'Leads', 'whenMatched' => 'replace', 'whenNotMatched' => 'discard']],
   ]
 );
+
 $mongoClient->$dbOrigin->Brokers->drop();
 
 //SE BUSCA EL DEAL DE CADA LEAD
@@ -53,7 +54,18 @@ $mongoClient->$dbOrigin->Leads->aggregate(
     ['$merge' => ['into' => 'Leads', 'whenMatched' => 'replace', 'whenNotMatched' => 'discard']]
   ]
 );
+
 $mongoClient->$dbOrigin->Deals->drop();
+
+//SE BUSCA EL DUEÑO DE CADA LEAD
+$mongoClient->$dbOrigin->Leads->aggregate(
+  [
+    ['$lookup' => ['from' => 'users', 'localField' => 'Owner.id', 'foreignField' => 'id', 'as' => 'Owner']],
+    ['$merge' => ['into' => 'Leads', 'whenMatched' => 'replace', 'whenNotMatched' => 'discard']]
+  ]
+);
+
+$mongoClient->$dbOrigin->users->drop();
 
 
 
