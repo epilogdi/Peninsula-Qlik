@@ -43,28 +43,28 @@ $remove = [
 $destination = "ZohoCRM";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
-$collections = $mongoClient->$destination->listCollections();
-$omit = array("LeadStatusTimeline", "DealStatusTimeline", "Cronjobs");
+
+$collections = $mongoClient->$admin->Modules->find(["enabled"=>true]); 
+
 
 foreach ($collections as $collection) {
   $module =  $collection["name"];
-  if (!in_array($module, $omit)) {
-    $mongoClient->$destination->$module->updateMany(
-      [],
-      [['$addFields' => ['createdDateParts' => ['$dateToParts' => ['date' => ['$dateFromString' => ['dateString' => '$Created_Time']]]], 'createdFullDate' => ['$toDate' => ['$dateFromString' => ['dateString' => '$Created_Time']]], 'createdDate' => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => ['$dateFromString' => ['dateString' => '$Created_Time']]]]]]],
-      ['multiple' => true]
-    );
 
-    $mongoClient->$destination->$module->updateMany(
-      [],
-      ['$unset' => $remove],
-      ['multiple' => true]
-    );
+  $mongoClient->$destination->$module->updateMany(
+    [],
+    [['$addFields' => ['createdDateParts' => ['$dateToParts' => ['date' => ['$dateFromString' => ['dateString' => '$Created_Time']]]], 'createdFullDate' => ['$toDate' => ['$dateFromString' => ['dateString' => '$Created_Time']]], 'createdDate' => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => ['$dateFromString' => ['dateString' => '$Created_Time']]]]]]],
+    ['multiple' => true]
+  );
 
-    $mongoClient->$destination->$module->aggregate(
-      [['$out' => ['db' => 'ZohoCRM-Consolidados', 'coll' => $module]]]
-    );
-  }
+  $mongoClient->$destination->$module->updateMany(
+    [],
+    ['$unset' => $remove],
+    ['multiple' => true]
+  );
+
+  $mongoClient->$destination->$module->aggregate(
+    [['$out' => ['db' => 'ZohoCRM-Consolidados', 'coll' => $module]]]
+  );
 }
 
 $cron = new stdClass();
