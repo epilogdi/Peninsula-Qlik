@@ -1,5 +1,5 @@
 <?php
-$pathx = explode('/', $path  );
+$pathx = explode('/', $path);
 array_pop($pathx);
 $pathx = implode('/', $pathx); 
 $env = parse_ini_file("$pathx/.env");
