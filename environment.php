@@ -1,5 +1,5 @@
 <?php
-$env = parse_ini_file('.env');
+$env = parse_ini_file('../.env');
 
 $ENV_MYSQL_HOST = $env["MYSQL_HOST"];
 $ENV_MYSQL_USER = $env['MYSQL_USER'];
