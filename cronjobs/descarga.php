@@ -4,7 +4,6 @@ $ruta = $_SERVER["PHP_SELF"];
 $archivo = "/cronjobs/".basename($_SERVER["PHP_SELF"]);
 $ruta = str_replace($archivo, "", $ruta);
 
-
 include "$ruta/environment.php";
 include "$ruta/vendor/autoload.php";
 include "$ruta/includes/mongo.php";
@@ -58,6 +57,6 @@ $cron->minutes=(microtime(true) - $start)/60;
 $cron->startUTC=$dateStart;
 $cron->endUTC=date('Y-m-d H:i:s');
 
-$mongoClient->$admin->Cronjobs->insertOne($cron);
+$mongoClient->$destination->Cronjobs->insertOne($cron);
 
 ?>
