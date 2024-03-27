@@ -1,11 +1,15 @@
 <?php
-$ruta = $_SERVER["PHP_SELF"];
-$archivo = "/cronjobs/".basename($_SERVER["PHP_SELF"]);
-$ruta = str_replace($archivo, "", $ruta);
+if($_SERVER["DOCUMENT_ROOT"]){
+  $path = $_SERVER["DOCUMENT_ROOT"];
+}else{ 
+  $name = basename($_SERVER["PHP_SELF"]);
+  $path = str_replace($name, "", $_SERVER["PHP_SELF"]); 
+  $path = str_replace("/cronjobs/", "", $path);
+}
 
-include "$ruta/environment.php";
-include "$ruta/vendor/autoload.php";
-include "$ruta/includes/mongo.php";
+include "$path/environment.php";
+include "$path/vendor/autoload.php";
+include "$path/includes/mongo.php";
 
 $dbOrigin="ZohoCRM-Consolidados";
 $start = microtime(true);
