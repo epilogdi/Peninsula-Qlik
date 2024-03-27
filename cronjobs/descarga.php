@@ -1,8 +1,14 @@
 <?php
-include "/opt/bitnami/apache2/htdocs/ZohoCRM/develop/environment.php";
-include "/opt/bitnami/apache2/htdocs/ZohoCRM/develop/vendor/autoload.php";
-include "/opt/bitnami/apache2/htdocs/ZohoCRM/develop/includes/mongo.php";
-include "/opt/bitnami/apache2/htdocs/ZohoCRM/develop/includes/zoho.php";
+
+$ruta = $_SERVER["PHP_SELF"];
+$archivo = "/cronjobs/".basename($_SERVER["PHP_SELF"]);
+$ruta = str_replace($archivo, "", $ruta);
+
+
+include "$ruta/environment.php";
+include "$ruta/vendor/autoload.php";
+include "$ruta/includes/mongo.php";
+include "$ruta/includes/zoho.php";
 
 function storeCollection($collectionName){ 
   global $mongoClient;
