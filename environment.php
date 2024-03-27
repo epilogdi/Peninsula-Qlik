@@ -1,5 +1,8 @@
 <?php
-$env = parse_ini_file('../.env');
+$pathx = explode('/', $path);
+array_pop($pathx);
+$pathx = implode('/', $pathx); 
+$env = parse_ini_file("$pathx/.env");
 
 $ENV_MYSQL_HOST = $env["MYSQL_HOST"];
 $ENV_MYSQL_USER = $env['MYSQL_USER'];

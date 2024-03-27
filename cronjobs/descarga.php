@@ -1,4 +1,5 @@
 <?php
+
 if($_SERVER["DOCUMENT_ROOT"]){
   $path = $_SERVER["DOCUMENT_ROOT"];
 }else{ 
@@ -39,7 +40,7 @@ function storeCollection($collectionName){
 
 }
 
-
+/*
 $admin="0-Admin";
 $destination = "ZohoCRM";
 
@@ -61,5 +62,5 @@ $cron->startUTC=$dateStart;
 $cron->endUTC=date('Y-m-d H:i:s');
 
 $mongoClient->$destination->Cronjobs->insertOne($cron);
-
+*/
 ?>
