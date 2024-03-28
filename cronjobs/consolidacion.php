@@ -11,6 +11,7 @@ include "$path/environment.php";
 include "$path/vendor/autoload.php";
 include "$path/includes/mongo.php";
 
+$admin="0-Admin";
 $dbOrigin="ZohoCRM-Consolidados";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
