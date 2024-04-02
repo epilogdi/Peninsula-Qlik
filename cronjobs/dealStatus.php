@@ -17,9 +17,9 @@ function getStatusTimeline($records){
   if($records){
     foreach ($records as $record) {   
       if(in_array($record->action, array("updated", "transition")) ){
-        if($record->field_history){
+        if(property_exists($record, 'field_history')){
           foreach ($record->field_history as $field) { 
-            if($field->api_name){
+            if(property_exists($field, 'api_name')){
               if($field->api_name == 'Stage'){
                 $objx = new stdClass();
                 $objx->auditedTime = $record->audited_time;
@@ -27,6 +27,9 @@ function getStatusTimeline($records){
                 $objx->newValue = $field->_value->new;
                 $objx->auditedBy_name = $record->done_by->name;
                 $objx->auditedBy_id = $record->done_by->id;
+                $objx->auditedBy_name = $record->done_by->name;
+                $objx->dealId = $record->record->id;
+                $objx->dealName = $record->record->name;
                 array_push( $filtered,$objx);
               }
             }
@@ -38,7 +41,7 @@ function getStatusTimeline($records){
   return $filtered;
 }
 
-function getTimeline($element){ 
+function getTimeline($id){ 
 
   global $mongoClient;
   $client = new GuzzleHttp\Client();
@@ -46,32 +49,21 @@ function getTimeline($element){
   $headers = [
     "Authorization" => "Zoho-oauthtoken $token->access_token"
   ];
-  $request = new \GuzzleHttp\Psr7\Request("GET", "https://www.zohoapis.com/crm/v5/Deals/$element->id/__timeline", $headers);
+  $request = new \GuzzleHttp\Psr7\Request("GET", "https://www.zohoapis.com/crm/v5/Deals/$id/__timeline", $headers);
 
   try {
     $response = $client->sendAsync($request)->wait();
     $response = json_decode($response->getBody());
+    $timeline = [];
 
-    $obj = new stdClass();
-    $obj->dealId = $element->id;
-    $obj->lastStatus = $element->Stage;
-    $obj->cerrado = (str_contains(strtolower($element->Stage), 'cerrado') || str_contains(strtolower($element->Stage), 'cancelado')) ? true : false;
-
-    $obj->respuesta = ($response) ? true : false;
     if($response){
-      if($response->__timeline){
-        $obj->timeline = getStatusTimeline($response->__timeline);
-      }else{
-        $obj->timeline = [];
+      if(property_exists($response, '__timeline')){
+        $timeline = getStatusTimeline($response->__timeline);
       }
-    }else{
-      $obj->timeline = [];
     }
-
-    return $obj;
+    return $timeline;
 
   } catch (Exception $e) {
-    error_log("Exception ERROR");
     return false;
   }
 
@@ -84,24 +76,33 @@ $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
 $filter = [];
-$options = [['sort' => ['_id' => 1]],['batchSize' => 500]];
+$options = [['sort' => ['_id' => 1]]];
 $elements = $mongoClient->$destination->Deals->find($filter, $options);
 $i=0;
 
 
 foreach ($elements as $element) { 
-  $encontrado = $mongoClient->$destination->DealStatusTimeline->findOne(['$and' => [['dealId' => $element->id], ['$or' => [['cerrado' => true], ['respuesta' => false]]]]]);
+  //$encontrado = $mongoClient->$destination->DealStatusControl->findOne(['$and' => [['dealId' => $element->id], ['$or' => [['cerrado' => true], ['respuesta' => false]]]]]);
+  $encontrado = $mongoClient->$destination->DealStatusControl->findOne(['$and' => [['dealId' => $element->id], ['cerrado' => true]]]);
   if(!$encontrado){
-    if($record = getTimeline($element)){
-      $mongoClient->$destination->DealStatusTimeline->deleteOne(['dealId' => $element->id]);
-      $mongoClient->$destination->DealStatusTimeline->insertOne($record);
-      error_log(++$i." ".$element->id." ---- TIMELINE: ".sizeof($record->timeline));      
-    }else{
-      error_log(++$i." $element->id ---- ERROR TRY CATCH");
+    $timeline = getTimeline($element->id);
+    $obj = new stdClass();
+    $obj->dealId = $element->id;
+    $obj->lastStatus = $element->Stage;
+    $obj->cerrado = (str_contains(strtolower($element->Stage), 'cerrado') || str_contains(strtolower($element->Stage), 'cancelado')) ? true : false;
+    $obj->respuesta = false;
+    if(sizeof($timeline)>0){
+      $mongoClient->$destination->DealStatusTimeline->deleteMany(['dealId' => $element->id]);
+      $mongoClient->$destination->DealStatusTimeline->insertMany($timeline);
+      $obj->respuesta = true;
     }
+    $mongoClient->$destination->DealStatusControl->deleteOne(['dealId' => $element->id]);
+    $mongoClient->$destination->DealStatusControl->insertOne($obj);
+
   }else{
-    error_log(++$i." $element->id ---- YA ESTABA");
+    error_log("$element->id ---- YA ESTABA");
   }
+
 }
 
 $cron = new stdClass();
