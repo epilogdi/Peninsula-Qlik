@@ -82,8 +82,6 @@ $i=0;
 
 
 foreach ($elements as $element) { 
-  error_log($i);
-  if($i++ == 20) break;
   //$encontrado = $mongoClient->$destination->LeadStatusControl->findOne(['$and' => [['leadId' => $element->id], ['$or' => [['cerrado' => true], ['respuesta' => false]]]]]);
   $encontrado = $mongoClient->$destination->LeadStatusControl->findOne(['$and' => [['leadId' => $element->id], ['cerrado' => true]]]);
   if(!$encontrado){
