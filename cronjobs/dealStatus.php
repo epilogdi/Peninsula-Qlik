@@ -18,22 +18,24 @@ function getStatusTimeline($records){
     foreach ($records as $record) {   
       if(in_array($record->action, array("updated", "transition")) ){
         if(property_exists($record, 'field_history')){
-          foreach ($record->field_history as $field) { 
-            if(property_exists($field, 'api_name')){
-              if($field->api_name == 'Stage'){
-                $objx = new stdClass();
-                $objx->auditedTime = $record->audited_time;
-                $objx->oldValue = $field->_value->old;
-                $objx->newValue = $field->_value->new;
-                $objx->auditedBy_name = $record->done_by->name;
-                $objx->auditedBy_id = $record->done_by->id;
-                $objx->auditedBy_name = $record->done_by->name;
-                $objx->dealId = $record->record->id;
-                $objx->dealName = $record->record->name;
-                array_push( $filtered,$objx);
+          if($record->field_history){
+            foreach ($record->field_history as $field) { 
+              if(property_exists($field, 'api_name')){
+                if($field->api_name == 'Stage'){
+                  $objx = new stdClass();
+                  $objx->auditedTime = $record->audited_time;
+                  $objx->oldValue = $field->_value->old;
+                  $objx->newValue = $field->_value->new;
+                  $objx->auditedBy_name = $record->done_by->name;
+                  $objx->auditedBy_id = $record->done_by->id;
+                  $objx->auditedBy_name = $record->done_by->name;
+                  $objx->dealId = $record->record->id;
+                  $objx->dealName = $record->record->name;
+                  array_push( $filtered,$objx);
+                }
               }
             }
-          }
+          }          
         }
       }        
     }
@@ -77,7 +79,9 @@ $dateStart = date('Y-m-d H:i:s');
 
 $filter = [];
 $options = [['sort' => ['_id' => 1]]];
-$elements = $mongoClient->$destination->Deals->find($filter, $options);
+//$elements = $mongoClient->$destination->Deals->find($filter, $options);
+
+$elements = $mongoClient->$destination->Deals->aggregate([['$sample' => ['size' => 3000]]]);
 $i=0;
 
 
@@ -99,10 +103,7 @@ foreach ($elements as $element) {
     $mongoClient->$destination->DealStatusControl->deleteOne(['dealId' => $element->id]);
     $mongoClient->$destination->DealStatusControl->insertOne($obj);
 
-  }else{
-    error_log("$element->id ---- YA ESTABA");
   }
-
 }
 
 $cron = new stdClass();
