@@ -10,7 +10,7 @@ if($_SERVER["DOCUMENT_ROOT"]){
 include "$path/environment.php";
 include "$path/vendor/autoload.php";
 include "$path/includes/mongo.php";
-include "$path/includes/zoho.php";
+include "$path/includes/zoho-crm.php";
 
 function getStatusTimeline($records){
   $filtered = [];
@@ -71,23 +71,22 @@ function getTimeline($id){
 
 }
 
-$admin="0-Admin";
-$destination = "ZohoCRM";
+$database = "ZohoCRM";
 
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
 $filter = [];
 $options = [['sort' => ['_id' => 1]]];
-//$elements = $mongoClient->$destination->Deals->find($filter, $options);
+//$elements = $mongoClient->$database->Deals->find($filter, $options);
 
-$elements = $mongoClient->$destination->Deals->aggregate([['$sample' => ['size' => 3000]]]);
+$elements = $mongoClient->$database->Deals->aggregate([['$sample' => ['size' => 3000]]]);
 $i=0;
 
 
 foreach ($elements as $element) { 
-  //$encontrado = $mongoClient->$destination->DealStatusControl->findOne(['$and' => [['dealId' => $element->id], ['$or' => [['cerrado' => true], ['respuesta' => false]]]]]);
-  $encontrado = $mongoClient->$destination->DealStatusControl->findOne(['$and' => [['dealId' => $element->id], ['cerrado' => true]]]);
+  //$encontrado = $mongoClient->$database->DealStatusControl->findOne(['$and' => [['dealId' => $element->id], ['$or' => [['cerrado' => true], ['respuesta' => false]]]]]);
+  $encontrado = $mongoClient->$database->DealStatusControl->findOne(['$and' => [['dealId' => $element->id], ['cerrado' => true]]]);
   if(!$encontrado){
     $timeline = getTimeline($element->id);
     $obj = new stdClass();
@@ -96,12 +95,12 @@ foreach ($elements as $element) {
     $obj->cerrado = (str_contains(strtolower($element->Stage), 'cerrado') || str_contains(strtolower($element->Stage), 'cancelado')) ? true : false;
     $obj->respuesta = false;
     if(sizeof($timeline)>0){
-      $mongoClient->$destination->DealStatusTimeline->deleteMany(['dealId' => $element->id]);
-      $mongoClient->$destination->DealStatusTimeline->insertMany($timeline);
+      $mongoClient->$database->DealStatusTimeline->deleteMany(['dealId' => $element->id]);
+      $mongoClient->$database->DealStatusTimeline->insertMany($timeline);
       $obj->respuesta = true;
     }
-    $mongoClient->$destination->DealStatusControl->deleteOne(['dealId' => $element->id]);
-    $mongoClient->$destination->DealStatusControl->insertOne($obj);
+    $mongoClient->$database->DealStatusControl->deleteOne(['dealId' => $element->id]);
+    $mongoClient->$database->DealStatusControl->insertOne($obj);
 
   }
 }
@@ -112,6 +111,6 @@ $cron->minutes=(microtime(true) - $start)/60;
 $cron->startUTC=$dateStart;
 $cron->endUTC=date('Y-m-d H:i:s');
 
-$mongoClient->$destination->Cronjobs->insertOne($cron);
+$mongoClient->$database->Cronjobs->insertOne($cron);
 
 ?>

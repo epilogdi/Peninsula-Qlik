@@ -11,7 +11,6 @@ include "$path/environment.php";
 include "$path/vendor/autoload.php";
 include "$path/includes/mongo.php";
 
-$admin="0-Admin";
 $dbOrigin="ZohoCRM-Consolidados";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
@@ -84,5 +83,5 @@ $cron->type="Consolidación";
 $cron->minutes=(microtime(true) - $start)/60;
 $cron->startUTC=$dateStart;
 $cron->endUTC=date('Y-m-d H:i:s');
-$mongoClient->$destination->Cronjobs->insertOne($cron);
+$mongoClient->$database->Cronjobs->insertOne($cron);
 ?>
