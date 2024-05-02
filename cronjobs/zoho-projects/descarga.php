@@ -62,7 +62,7 @@ foreach ($projects as $project) {
   }  
 }
 
-$cron = new stdClass();
+$cron = new stdClass(); 
 $cron->type="Descarga";
 $cron->minutes=(microtime(true) - $start)/60;
 $cron->startUTC=$dateStart;
