@@ -11,11 +11,11 @@ if($_SERVER["DOCUMENT_ROOT"]){
 include "$path/environment.php";
 include "$path/vendor/autoload.php";
 include "$path/includes/mongo.php";
-include "$path/includes/zoho.php";
+include "$path/includes/zoho-crm.php";
 
 function storeCollection($collectionName){ 
   global $mongoClient;
-  global $destination;
+  global $database;
   global $page;
   $client = new GuzzleHttp\Client();
   $token = getLastValidToken();
@@ -28,7 +28,7 @@ function storeCollection($collectionName){
     $response = $client->sendAsync($request)->wait();
     $response = json_decode($response->getBody());
     $records = (property_exists($response, 'users'))?$response->users:$response->data;
-    $mongoClient->$destination->$collectionName->insertMany($records);
+    $mongoClient->$database->$collectionName->insertMany($records);
     if($response->info->more_records==true){   
       $page++;
       storeCollection($collectionName);
@@ -40,18 +40,15 @@ function storeCollection($collectionName){
 
 }
 
-
-$admin="0-Admin";
-$destination = "ZohoCRM";
-
+$database = "ZohoCRM";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
-$collections = $mongoClient->$admin->Modules->find(["enabled"=>true]);  
+$collections = $mongoClient->$database->Modules->find(["enabled"=>true]);  
 foreach ($collections as $collection) {
   $page=1;
   $collectionName = $collection->name;
-  $mongoClient->$destination->$collectionName->drop();
+  $mongoClient->$database->$collectionName->drop();
   storeCollection($collectionName);
 }
 
@@ -61,6 +58,6 @@ $cron->minutes=(microtime(true) - $start)/60;
 $cron->startUTC=$dateStart;
 $cron->endUTC=date('Y-m-d H:i:s');
 
-$mongoClient->$destination->Cronjobs->insertOne($cron);
+$mongoClient->$database->Cronjobs->insertOne($cron);
 
 ?>

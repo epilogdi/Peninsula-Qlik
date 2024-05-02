@@ -10,7 +10,7 @@ if($_SERVER["DOCUMENT_ROOT"]){
 include "$path/environment.php";
 include "$path/vendor/autoload.php";
 include "$path/includes/mongo.php";
-include "$path/includes/zoho.php";
+include "$path/includes/zoho-crm.php";
 
 function getStatusTimeline($records){
   $filtered = [];
@@ -71,21 +71,20 @@ function getTimeline($id){
 
 }
 
-$admin="0-Admin";
-$destination = "ZohoCRM";
+$database = "ZohoCRM";
 
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
 $filter = [];
 $options = [['sort' => ['_id' => 1]]];
-$elements = $mongoClient->$destination->Leads->aggregate([['$sample' => ['size' => 3000]]]);
+$elements = $mongoClient->$database->Leads->aggregate([['$sample' => ['size' => 3000]]]);
 $i=0;
 
 
 foreach ($elements as $element) { 
-  //$encontrado = $mongoClient->$destination->LeadStatusControl->findOne(['$and' => [['leadId' => $element->id], ['$or' => [['cerrado' => true], ['respuesta' => false]]]]]);
-  $encontrado = $mongoClient->$destination->LeadStatusControl->findOne(['$and' => [['leadId' => $element->id], ['cerrado' => true]]]);
+  //$encontrado = $mongoClient->$database->LeadStatusControl->findOne(['$and' => [['leadId' => $element->id], ['$or' => [['cerrado' => true], ['respuesta' => false]]]]]);
+  $encontrado = $mongoClient->$database->LeadStatusControl->findOne(['$and' => [['leadId' => $element->id], ['cerrado' => true]]]);
   if(!$encontrado){
     $timeline = getTimeline($element->id);
     $obj = new stdClass();
@@ -94,12 +93,12 @@ foreach ($elements as $element) {
     $obj->cerrado = (str_contains(strtolower($element->Lead_Status), 'cerrado') || str_contains(strtolower($element->Lead_Status), 'cancelado')) ? true : false;
     $obj->respuesta = false;
     if(sizeof($timeline)>0){
-      $mongoClient->$destination->LeadStatusTimeline->deleteMany(['leadId' => $element->id]);
-      $mongoClient->$destination->LeadStatusTimeline->insertMany($timeline);
+      $mongoClient->$database->LeadStatusTimeline->deleteMany(['leadId' => $element->id]);
+      $mongoClient->$database->LeadStatusTimeline->insertMany($timeline);
       $obj->respuesta = true;
     }
-    $mongoClient->$destination->LeadStatusControl->deleteOne(['leadId' => $element->id]);
-    $mongoClient->$destination->LeadStatusControl->insertOne($obj);
+    $mongoClient->$database->LeadStatusControl->deleteOne(['leadId' => $element->id]);
+    $mongoClient->$database->LeadStatusControl->insertOne($obj);
 
   }
 }
@@ -110,6 +109,6 @@ $cron->minutes=(microtime(true) - $start)/60;
 $cron->startUTC=$dateStart;
 $cron->endUTC=date('Y-m-d H:i:s');
 
-$mongoClient->$destination->Cronjobs->insertOne($cron);
+$mongoClient->$database->Cronjobs->insertOne($cron);
 
 ?>

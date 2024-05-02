@@ -40,30 +40,29 @@ $remove = [
 
 ];
 
-$admin="0-Admin";
-$destination = "ZohoCRM";
+$database = "ZohoCRM";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
-$collections = $mongoClient->$admin->Modules->find(["enabled"=>true]); 
+$collections = $mongoClient->$database->Modules->find(["enabled"=>true]); 
 
 
 foreach ($collections as $collection) {
   $module =  $collection["name"];
 
-  $mongoClient->$destination->$module->updateMany(
+  $mongoClient->$database->$module->updateMany(
     [],
     [['$addFields' => ['createdDateParts' => ['$dateToParts' => ['date' => ['$dateFromString' => ['dateString' => '$Created_Time']]]], 'createdFullDate' => ['$toDate' => ['$dateFromString' => ['dateString' => '$Created_Time']]], 'createdDate' => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => ['$dateFromString' => ['dateString' => '$Created_Time']]]]]]],
     ['multiple' => true]
   );
 
-  $mongoClient->$destination->$module->updateMany(
+  $mongoClient->$database->$module->updateMany(
     [],
     ['$unset' => $remove],
     ['multiple' => true]
   );
 
-  $mongoClient->$destination->$module->aggregate(
+  $mongoClient->$database->$module->aggregate(
     [['$out' => ['db' => 'ZohoCRM-Consolidados', 'coll' => $module]]]
   );
 }
@@ -73,7 +72,7 @@ $cron->type="Limpieza";
 $cron->minutes=(microtime(true) - $start)/60;
 $cron->startUTC=$dateStart;
 $cron->endUTC=date('Y-m-d H:i:s');
-$mongoClient->$destination->Cronjobs->insertOne($cron);
+$mongoClient->$database->Cronjobs->insertOne($cron);
 
 
 ?>
