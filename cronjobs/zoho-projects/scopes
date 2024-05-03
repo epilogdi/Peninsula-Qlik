@@ -1,0 +1,16 @@
+ZohoProjects.portals.READ	/restapi/portals/
+ZohoProjects.projects.READ	/restapi/portal/[PORTALID]/projects/
+ZohoProjects.activities.READ	/restapi/portal/[PORTALID]/projects/[PROJECTID]/activities/
+ZohoProjects.milestones.READ	/restapi/portal/[PORTALID]/projects/[PROJECTID]/milestones/
+ZohoProjects.tasklists.READ	/restapi/portal/[PORTALID]/projects/[PROJECTID]/tasklists/
+ZohoProjects.tasks.READ		/restapi/portal/[PORTALID]/projects/[PROJECTID]/tasks/
+ZohoProjects.timesheets.READ	/restapi/portal/[PORTALID]/projects/[PROJECTID]/logs/
+ZohoProjects.bugs.READ		/restapi/portal/[PORTALID]/projects/[PROJECTID]/bugs/
+ZohoProjects.events.READ	/restapi/portal/[PORTALID]/projects/[PROJECTID]/events/
+ZohoProjects.forums.READ	/restapi/portal/[PORTALID]/projects/[PROJECTID]/forums/
+ZohoProjects.users.READ		/restapi/portal/[PORTALID]/projects/[PROJECTID]/users/
+
+
+
+
+ZohoProjects.portals.READ, ZohoProjects.projects.READ, ZohoProjects.activities.READ, ZohoProjects.milestones.READ, ZohoProjects.tasklists.READ, ZohoProjects.tasks.READ, ZohoProjects.timesheets.READ, ZohoProjects.bugs.READ, ZohoProjects.events.READ, ZohoProjects.forums.READ, ZohoProjects.users.READ
