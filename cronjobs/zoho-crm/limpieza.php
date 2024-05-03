@@ -5,7 +5,7 @@ if($_SERVER["DOCUMENT_ROOT"]){
 }else{ 
   $name = basename($_SERVER["PHP_SELF"]);
   $path = str_replace($name, "", $_SERVER["PHP_SELF"]); 
-  $path = str_replace("/cronjobs/", "", $path);
+  $path = str_replace("/cronjobs/zoho-crm/", "", $path);
 }
 
 include "$path/environment.php";
