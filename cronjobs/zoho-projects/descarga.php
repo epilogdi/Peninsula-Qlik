@@ -53,11 +53,12 @@ $projects = $mongoClient->$database->Projects->find();
 foreach ($projects as $project) {
   $modules = $mongoClient->$database->Modules->find(["enabled"=>true]);  
   foreach ($modules as $module) {
-    $page=0;
-    $collectionName = "$project->name - $module->name";
-    $mongoClient->$database->$collectionName->drop();
+    $page=0;   
+    
     $project->name = str_replace("Seguimiento ", "", $project->name);
     $project->name = str_replace(" Peninsula", "", $project->name);
+    $collectionName = "$project->name - $module->name";
+    $mongoClient->$database->$collectionName->drop();
     storeCollection($project,$module->name);
   }  
 }

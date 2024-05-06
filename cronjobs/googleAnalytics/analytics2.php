@@ -1,17 +1,17 @@
 <?php 
-require_once "vendor/autoload.php";
+require_once "../../vendor/autoload.php";
 use Google\Analytics\Data\V1beta\Client\BetaAnalyticsDataClient;
 use Google\Analytics\Data\V1beta\DateRange;
 use Google\Analytics\Data\V1beta\Dimension;
 use Google\Analytics\Data\V1beta\Metric;
 use Google\Analytics\Data\V1beta\RunReportRequest;
 
-$service_account_key_file_path = "../cedar-module-421115-6db17b1cdedc.json";
+$service_account_key_file_path = "../../../cedar-module-421115-6db17b1cdedc.json";
 $client = new BetaAnalyticsDataClient([
   'credentials' => $service_account_key_file_path
 ]);
 
-$property_id = '277757220';
+$property_id = '362175915';
 
 $request = (new RunReportRequest())
   ->setProperty('properties/' . $property_id)
