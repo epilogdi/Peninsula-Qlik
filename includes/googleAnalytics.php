@@ -21,6 +21,7 @@ function getData($response,$project){
     $obj->deviceCategory = $row->getDimensionValues()[3]->getValue();
     $obj->country = $row->getDimensionValues()[4]->getValue();
     $obj->city = $row->getDimensionValues()[5]->getValue();
+    $obj->date = $row->getDimensionValues()[6]->getValue();
     $obj->totalusers = $row->getMetricValues()[0]->getValue();
     $obj->sessions = $row->getMetricValues()[1]->getValue();
     $obj->sessionsPerUser = $row->getMetricValues()[2]->getValue();
@@ -37,7 +38,7 @@ function extractAnalytics($project){
     ->setProperty('properties/' . $project->viewId)
     ->setDateRanges([
       new DateRange([
-        'start_date' => 'yesterday',
+        'start_date' => '2020-01-01',
         'end_date' => 'today',
       ]),
     ])
@@ -53,6 +54,8 @@ function extractAnalytics($project){
       'name' => 'country',
     ]),new Dimension([
       'name' => 'city',
+    ]),new Dimension([
+      'name' => 'date',
     ])
                     ])
     ->setMetrics([new Metric([
