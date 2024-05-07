@@ -15,8 +15,8 @@ include "$path/includes/googleAnalytics.php";
 
 
 $database = "GoogleAnalytics";
-//$start = microtime(true);
-//$dateStart = date('Y-m-d H:i:s');
+$start = microtime(true);
+$dateStart = date('Y-m-d H:i:s');
 
 $projects = $mongoClient->$database->Projects->find(["enabled"=>true]);  
 $mongoClient->$database->Descarga->drop();
@@ -28,12 +28,12 @@ foreach ($projects as $project) {
   }
 }
 
-/*$cron = new stdClass();
-$cron->type="Descarga Inicial";
+$cron = new stdClass();
+$cron->type="Descarga Diaria";
 $cron->minutes=(microtime(true) - $start)/60;
 $cron->startUTC=$dateStart;
 $cron->endUTC=date('Y-m-d H:i:s');
 
-$mongoClient->$database->Cronjobs->insertOne($cron);*/
+$mongoClient->$database->Cronjobs->insertOne($cron);
 
 ?>
