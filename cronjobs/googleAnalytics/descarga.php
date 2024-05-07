@@ -24,7 +24,7 @@ foreach ($projects as $project) {
   $response = extractAnalytics($project);
   $insert = getData($response,$project);
   $mongoClient->$database->Descarga->insertMany($insert);
-}
+} 
 
 /*$cron = new stdClass();
 $cron->type="Descarga Inicial";
