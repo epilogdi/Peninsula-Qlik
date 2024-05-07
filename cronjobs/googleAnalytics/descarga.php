@@ -23,11 +23,7 @@ $mongoClient->$database->Descarga->drop();
 foreach ($projects as $project) {  
   $response = extractAnalytics($project);
   $insert = getData($response,$project);
-  echo (count($insert));
-  if (count($insert) > 0) {
-    $mongoClient->$database->Descarga->insertMany($insert);
-  }
-
+  $mongoClient->$database->Descarga->insertMany($insert);
 }
 
 /*$cron = new stdClass();
