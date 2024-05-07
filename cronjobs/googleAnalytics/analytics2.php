@@ -25,19 +25,42 @@ $request = (new RunReportRequest())
     'name' => 'pagePath',
   ]),new Dimension([
     'name' => 'pageTitle',
+  ]),new Dimension([
+    'name' => 'eventName',
+  ]),new Dimension([
+    'name' => 'deviceCategory',
+  ]),new Dimension([
+    'name' => 'country',
+  ]),new Dimension([
+    'name' => 'city',
   ])
                   ])
   ->setMetrics([new Metric([
     'name' => 'totalusers',
+  ]),new Metric([
+    'name' => 'sessions',
+  ]),new Metric([
+    'name' => 'sessionsPerUser',
+  ]),new Metric([
+    'name' => 'averageSessionDuration',
   ])
                ]);
+
+  
 $response = $client->runReport($request);
 
 
 foreach ($response->getRows() as $row) {
   echo $row->getDimensionValues()[0]->getValue()."<br>";
   echo $row->getDimensionValues()[1]->getValue()."<br>";
+  echo $row->getDimensionValues()[2]->getValue()."<br>";
+  echo $row->getDimensionValues()[3]->getValue()."<br>";
+  echo $row->getDimensionValues()[4]->getValue()."<br>";
+  echo $row->getDimensionValues()[5]->getValue()."<br>";
   echo $row->getMetricValues()[0]->getValue()."<br>";
+  echo $row->getMetricValues()[1]->getValue()."<br>";
+  echo $row->getMetricValues()[2]->getValue()."<br>";
+  echo $row->getMetricValues()[3]->getValue()."<br>";
   echo "<hr>";
 }
 
