@@ -37,8 +37,8 @@ function extractAnalytics($project){
     ->setProperty('properties/' . $project->viewId)
     ->setDateRanges([
       new DateRange([
-        'start_date' => '2020-01-01',
-        'end_date' => 'yesterday',
+        'start_date' => 'yesterday',
+        'end_date' => 'today',
       ]),
     ])
     ->setDimensions([new Dimension([
