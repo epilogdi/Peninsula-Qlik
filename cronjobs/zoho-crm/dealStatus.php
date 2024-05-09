@@ -86,7 +86,8 @@ $i=0;
 
 foreach ($elements as $element) { 
   //$encontrado = $mongoClient->$database->DealStatusControl->findOne(['$and' => [['dealId' => $element->id], ['$or' => [['cerrado' => true], ['respuesta' => false]]]]]);
-  $encontrado = $mongoClient->$database->DealStatusControl->findOne(['$and' => [['dealId' => $element->id], ['cerrado' => true]]]);
+  //$encontrado = $mongoClient->$database->DealStatusControl->findOne(['$and' => [['dealId' => $element->id], ['cerrado' => true]]]);
+  $encontrado = $mongoClient->$database->DealStatusControl->findOne(['dealId' => $element->id]);
   if(!$encontrado){
     $timeline = getTimeline($element->id);
     $obj = new stdClass();
