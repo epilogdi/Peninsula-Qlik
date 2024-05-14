@@ -13,6 +13,30 @@ include "$path/vendor/autoload.php";
 include "$path/includes/mongo.php";
 include "$path/includes/zoho-projects.php";
 
+function getPropertyArrayString($array,$property){
+  $array = json_encode($array);
+  $array = json_decode($array);
+  $hola = array_column($array,$property);
+  return implode(",",$hola);
+}
+
+function getTasksKeys($tasks,$dependencyDetails){
+  $keys = array();
+  foreach ($tasks as $task) {
+    array_push($keys, $dependencyDetails[$task]->KEY);
+  }
+  return implode(",",$keys);
+}
+
+function getMilestoneName($id,$project){
+  global $mongoClient; 
+  global $database;
+  $collectionName = "$project - milestones";
+  $element = $mongoClient->$database->$collectionName->find();
+  $element = iterator_to_array($element);
+  return $element[0]->name;
+}
+
 function consolidar($type){
   global $mongoClient;
   global $database;
@@ -23,17 +47,28 @@ function consolidar($type){
     $obj = new stdClass();
     $obj->tipo = $type;
     $obj->tasklistName = $actividadesTask->tasklist->name;
-    $obj->tasklistName = $actividadesTask->tasklist->name;
     $obj->name = $actividadesTask->name;
+    $obj->milestone_id = $actividadesTask->milestone_id;
+    $obj->milestone = isset($actividadesTask->milestone_id)?getMilestoneName($actividadesTask->milestone_id,$type):null;
+    $obj->created_time = $actividadesTask->created_time;
+    $obj->end_date = $actividadesTask->end_date;
+    $obj->completed_time = isset($actividadesTask->completed_time)?$actividadesTask->completed_time:null;
+    $obj->priority = $actividadesTask->priority;
     $obj->duration = $actividadesTask->duration;
     $obj->duration_type = $actividadesTask->duration_type;
     $obj->percent_complete = $actividadesTask->percent_complete;
     $obj->start_date = $actividadesTask->start_date;
-    $obj->end_date = $actividadesTask->end_date;
-    $obj->key = $actividadesTask->key;  
+    $obj->key = $actividadesTask->key;
     $obj->statusName = $actividadesTask->status->name;  
     $obj->tasklistId = $actividadesTask->tasklist->id;
     $obj->completed = $actividadesTask->completed;
+    $obj->ownersName = getPropertyArrayString($actividadesTask->details->owners,'full_name');
+    $obj->ownersId = getPropertyArrayString($actividadesTask->details->owners,'id');
+
+
+    $obj->actividadesPredecesorasKey = isset($actividadesTask->dependency->predecessor)?getTasksKeys($actividadesTask->dependency->predecessor,$actividadesTask->dependency->dependencyDetails):null;
+    $obj->actividadesSucesorasKey = isset($actividadesTask->dependency->successor)?getTasksKeys($actividadesTask->dependency->successor,$actividadesTask->dependency->dependencyDetails):null;
+
     foreach ($actividadesTask->custom_fields as $customField) {
       $field = "_".$customField->label_name;
       $obj->$field = $customField->value;
