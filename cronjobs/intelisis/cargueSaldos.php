@@ -28,6 +28,12 @@ foreach ($rows as $key=>$row) {
     $obj = new stdClass();
     $columnas = $row;
     foreach ($columnas as $key=>$columna) {
+      if (str_contains($columna, '$')) {
+        $columna = str_replace(" ", "", $columna);
+        $columna = str_replace("$", "", $columna);
+        $columna = str_replace(",", "", $columna);
+        $columna = floatval($columna);
+      }
       $xx=$rotulos[$key];
       $obj->$xx=$columna;      
     }
