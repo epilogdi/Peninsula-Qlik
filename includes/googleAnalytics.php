@@ -31,15 +31,15 @@ function getData($response,$project){
   return $data;
 }
 
-function extractAnalytics($project){
+function extractAnalytics($project, $startDate, $end_date){
   global $client;
   global $database;
   $request = (new RunReportRequest())
     ->setProperty('properties/' . $project->viewId)
     ->setDateRanges([
       new DateRange([
-       'start_date' => 'yesterday',
-        'end_date' => 'today',
+       'start_date' => $startDate,
+        'end_date' => $end_date,
       ]),
     ])
     ->setDimensions([new Dimension([
