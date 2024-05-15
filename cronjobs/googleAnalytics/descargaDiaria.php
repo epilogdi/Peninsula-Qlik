@@ -17,11 +17,12 @@ include "$path/includes/googleAnalytics.php";
 $database = "GoogleAnalytics";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
+$collection = "Control-Diario";
 
-$projects = $mongoClient->$database->Projects->find(["enabled"=>true]);  
+$projects = $mongoClient->$database->$collection->find(["enabled"=>true]);  
 $mongoClient->$database->Descarga->drop();
 foreach ($projects as $project) {  
-  $response = extractAnalytics($project);
+  $response = extractAnalytics($project,'yesterday','today');
   $insert = getData($response,$project);
   if (count($insert) > 0) {
     $mongoClient->$database->Descarga->insertMany($insert);
