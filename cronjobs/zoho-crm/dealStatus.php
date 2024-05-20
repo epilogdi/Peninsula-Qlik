@@ -37,7 +37,23 @@ function getStatusTimeline($records){
             }
           }          
         }
-      }        
+      }elseif(in_array($record->action, array("process_entry"))){
+        if(property_exists($record, 'automation_details')){
+          if($record->automation_details){
+            if($record->automation_details->rule->state->field->api_name == "Stage"){
+              $objx = new stdClass();
+              $objx->auditedTime = $record->audited_time;
+              $objx->oldValue = null;
+              $objx->newValue = $record->automation_details->rule->state->name;
+              $objx->auditedBy_name = $record->done_by->name;
+              $objx->auditedBy_id = $record->done_by->id;
+              $objx->dealId = $record->record->id;
+              $objx->dealName = $record->record->name;
+              array_push( $filtered,$objx);
+            }
+          }
+        }
+      }    
     }
   }
   return $filtered;
@@ -66,6 +82,7 @@ function getTimeline($id){
     return $timeline;
 
   } catch (Exception $e) {
+    error_log("Exception ERROR");
     return false;
   }
 
@@ -76,34 +93,34 @@ $database = "ZohoCRM";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
-$filter = [];
-$options = [['sort' => ['_id' => 1]]];
+//$filter = [];
+//$options = [['sort' => ['_id' => 1]]];
 //$elements = $mongoClient->$database->Deals->find($filter, $options);
-
 $elements = $mongoClient->$database->Deals->aggregate([['$sample' => ['size' => 3000]]]);
-$i=0;
+//$elements = $mongoClient->$database->Deals->find(['id' => "5153690000048130031"]);
 
+$i=0;
 
 foreach ($elements as $element) { 
   //$encontrado = $mongoClient->$database->DealStatusControl->findOne(['$and' => [['dealId' => $element->id], ['$or' => [['cerrado' => true], ['respuesta' => false]]]]]);
   //$encontrado = $mongoClient->$database->DealStatusControl->findOne(['$and' => [['dealId' => $element->id], ['cerrado' => true]]]);
-  $encontrado = $mongoClient->$database->DealStatusControl->findOne(['dealId' => $element->id]);
-  if(!$encontrado){
+  //$encontrado = $mongoClient->$database->DealStatusControl->findOne(['dealId' => $element->id]);
+  //if(!$encontrado){
     $timeline = getTimeline($element->id);
-    $obj = new stdClass();
-    $obj->dealId = $element->id;
-    $obj->lastStatus = $element->Stage;
-    $obj->cerrado = (str_contains(strtolower($element->Stage), 'cerrado') || str_contains(strtolower($element->Stage), 'cancelado')) ? true : false;
-    $obj->respuesta = false;
+    //$obj = new stdClass();
+    //$obj->dealId = $element->id;
+    //$obj->lastStatus = $element->Stage;
+    //$obj->cerrado = (str_contains(strtolower($element->Stage), 'cerrado') || str_contains(strtolower($element->Stage), 'cancelado')) ? true : false;
+    //$obj->respuesta = false;
     if(sizeof($timeline)>0){
       $mongoClient->$database->DealStatusTimeline->deleteMany(['dealId' => $element->id]);
       $mongoClient->$database->DealStatusTimeline->insertMany($timeline);
-      $obj->respuesta = true;
+      //$obj->respuesta = true;
     }
-    $mongoClient->$database->DealStatusControl->deleteOne(['dealId' => $element->id]);
-    $mongoClient->$database->DealStatusControl->insertOne($obj);
+    //$mongoClient->$database->DealStatusControl->deleteOne(['dealId' => $element->id]);
+    //$mongoClient->$database->DealStatusControl->insertOne($obj);
 
-  }
+  //}
 }
 
 $cron = new stdClass();
