@@ -36,7 +36,23 @@ function getStatusTimeline($records){
             }
           }
         }
-      }        
+      }elseif(in_array($record->action, array("process_entry"))){
+        if(property_exists($record, 'automation_details')){
+          if($record->automation_details){
+            if($record->automation_details->rule->state->field->api_name == "Stage"){
+              $objx = new stdClass();
+              $objx->auditedTime = $record->audited_time;
+              $objx->oldValue = null;
+              $objx->newValue = $record->automation_details->rule->state->name;
+              $objx->auditedBy_name = $record->done_by->name;
+              $objx->auditedBy_id = $record->done_by->id;
+              $objx->leadId = $record->record->id;
+              $objx->leadName = $record->record->name;
+              array_push( $filtered,$objx);
+            }
+          }
+        }
+      }       
     }
   }
   return $filtered;
@@ -76,31 +92,33 @@ $database = "ZohoCRM";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
-$filter = [];
-$options = [['sort' => ['_id' => 1]]];
+//$filter = [];
+//$options = [['sort' => ['_id' => 1]]];
 $elements = $mongoClient->$database->Leads->aggregate([['$sample' => ['size' => 3000]]]);
+//$elements = $mongoClient->$database->Leads->find(['leadId' => 5153690000048130031]);
+
 $i=0;
 
 
 foreach ($elements as $element) { 
   //$encontrado = $mongoClient->$database->LeadStatusControl->findOne(['$and' => [['leadId' => $element->id], ['$or' => [['cerrado' => true], ['respuesta' => false]]]]]);
-  $encontrado = $mongoClient->$database->LeadStatusControl->findOne(['$and' => [['leadId' => $element->id], ['cerrado' => true]]]);
-  if(!$encontrado){
+  //$encontrado = $mongoClient->$database->LeadStatusControl->findOne(['$and' => [['leadId' => $element->id], ['cerrado' => true]]]);
+  //$encontrado = $mongoClient->$database->LeadStatusControl->findOne(['leadId' => $element->id]);
+  //if(!$encontrado){
     $timeline = getTimeline($element->id);
-    $obj = new stdClass();
-    $obj->leadId = $element->id;
-    $obj->lastStatus = $element->Lead_Status;
-    $obj->cerrado = (str_contains(strtolower($element->Lead_Status), 'cerrado') || str_contains(strtolower($element->Lead_Status), 'cancelado')) ? true : false;
-    $obj->respuesta = false;
+    //$obj = new stdClass();
+    //$obj->leadId = $element->id;
+    //$obj->lastStatus = $element->Lead_Status;
+    //$obj->cerrado = (str_contains(strtolower($element->Lead_Status), 'cerrado') || str_contains(strtolower($element->Lead_Status), 'cancelado')) ? true : false;
+    //$obj->respuesta = false;
     if(sizeof($timeline)>0){
       $mongoClient->$database->LeadStatusTimeline->deleteMany(['leadId' => $element->id]);
       $mongoClient->$database->LeadStatusTimeline->insertMany($timeline);
-      $obj->respuesta = true;
+      //$obj->respuesta = true;
     }
-    $mongoClient->$database->LeadStatusControl->deleteOne(['leadId' => $element->id]);
-    $mongoClient->$database->LeadStatusControl->insertOne($obj);
-
-  }
+    //$mongoClient->$database->LeadStatusControl->deleteOne(['leadId' => $element->id]);
+    //$mongoClient->$database->LeadStatusControl->insertOne($obj);
+  //}
 }
 
 $cron = new stdClass();
