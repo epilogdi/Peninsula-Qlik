@@ -20,7 +20,7 @@ $dateStart = date('Y-m-d H:i:s');
 $collection = "Control-Diario";
 
 $projects = $mongoClient->$database->$collection->find(["enabled"=>true]);  
-$mongoClient->$database->Descarga->drop();
+
 foreach ($projects as $project) {  
   $response = extractAnalytics($project,'yesterday','today');
   $insert = getData($response,$project);
