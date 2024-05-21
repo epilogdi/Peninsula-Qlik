@@ -39,7 +39,7 @@ function getStatusTimeline($records){
       }elseif(in_array($record->action, array("process_entry"))){
         if(property_exists($record, 'automation_details')){
           if($record->automation_details){
-            if($record->automation_details->rule->state->field->api_name == "Stage"){
+            if($record->automation_details->rule->state->field->api_name == "Lead_Status"){
               $objx = new stdClass();
               $objx->auditedTime = $record->audited_time;
               $objx->oldValue = null;
