@@ -14,7 +14,7 @@ include "$path/includes/mongo.php";
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-$filename = '../../../test.xlsx';
+$filename = '../../../saldos.xlsx';
 $spreadsheet = IOFactory::load($filename);
 $worksheet = $spreadsheet->getActiveSheet();
 $rows = $worksheet->toArray();
@@ -41,7 +41,7 @@ foreach ($rows as $key=>$row) {
   }
 }
 
-$database = "Intelisis";
+$database = "Cobranzas";
 $collection = "Saldos";
 $mongoClient->$database->$collection->insertMany($objetos);
 
