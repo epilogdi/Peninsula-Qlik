@@ -15,6 +15,8 @@ include "$path/includes/googleAnalytics.php";
 
 
 $database = "GoogleAnalytics";
+$start = microtime(true);
+$dateStart = date('Y-m-d H:i:s');
 $controlHistorico = "Control-Historico";
 $controlDiario = "Control-Diario";
 $projects = $mongoClient->$database->$controlHistorico->find(["enabled"=>true]);  
@@ -28,7 +30,13 @@ foreach ($projects as $project) {
   $mongoClient->$database->$controlHistorico->deleteOne(["viewId"=>$project->viewId]); 
   $mongoClient->$database->$controlDiario->insertOne($project);  
 }
+$cron = new stdClass();
+$cron->type="Descarga Historica";
+$cron->minutes=(microtime(true) - $start)/60;
+$cron->startUTC=$dateStart;
+$cron->endUTC=date('Y-m-d H:i:s');
 
+$mongoClient->$database->Cronjobs->insertOne($cron);
 
 
 ?>
