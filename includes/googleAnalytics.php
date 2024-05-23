@@ -5,8 +5,13 @@ use Google\Analytics\Data\V1beta\Dimension;
 use Google\Analytics\Data\V1beta\Metric;
 use Google\Analytics\Data\V1beta\RunReportRequest;
 
+$ruta = $path;
+$ruta = explode("/", $ruta);
+array_pop($ruta);
+$ruta = implode("/",$ruta);
+
 $client = new BetaAnalyticsDataClient([
-  'credentials' => "../../../cedar-module-421115-6db17b1cdedc.json"
+  'credentials' => "$ruta/cedar-module-421115-6db17b1cdedc.json"
 ]);
 
 function getData($response,$project){
