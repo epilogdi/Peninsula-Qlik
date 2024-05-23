@@ -22,7 +22,7 @@ $collection = "Control-Diario";
 $projects = $mongoClient->$database->$collection->find(["enabled"=>true]);  
 
 foreach ($projects as $project) {  
-  $response = extractAnalytics($project,'yesterday','today');
+  $response = extractAnalytics($project,'today','today');
   $insert = getData($response,$project);
   if (count($insert) > 0) {
     $mongoClient->$database->Descarga->insertMany($insert);
