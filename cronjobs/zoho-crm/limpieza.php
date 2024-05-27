@@ -62,9 +62,9 @@ foreach ($collections as $collection) {
     ['multiple' => true]
   );
 
-  $mongoClient->$database->$module->aggregate(
+  /*$mongoClient->$database->$module->aggregate(
     [['$out' => ['db' => 'ZohoCRM-Consolidados', 'coll' => $module]]]
-  );
+  );*/
 }
 
 $cron = new stdClass();
