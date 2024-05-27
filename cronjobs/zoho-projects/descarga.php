@@ -82,13 +82,12 @@ function storeCollection($project,$module){
   global $mongoClient;
   global $database;
   global $ENV_ZOHO_PROJECTS_PORTAL_ID;
-  global $page;
   $client = new GuzzleHttp\Client();
   $token = getLastValidToken();
   $headers = [
     "Authorization" => "Zoho-oauthtoken $token->access_token"
   ];
-  $url = "https://projectsapi.zoho.com/restapi/portal/$ENV_ZOHO_PROJECTS_PORTAL_ID/projects/$project->id/$module/?index=$page&range=200";
+  $url = "https://projectsapi.zoho.com/restapi/portal/$ENV_ZOHO_PROJECTS_PORTAL_ID/projects/$project->id/$module/?index=$project->page&range=200";
   $request = new \GuzzleHttp\Psr7\Request("GET", $url, $headers);
 
   try {
@@ -98,8 +97,7 @@ function storeCollection($project,$module){
       $records = $response[$module];
       $collectionName = "$project->name - $module";
       $mongoClient->$database->$collectionName->insertMany($records);
-      $page++;
-      $page=$page*100;
+      $project->page = $project->page + 200;
       storeCollection($project,$module);
     }
 
@@ -114,12 +112,11 @@ $database = "ZohoProjects";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
-$projects = $mongoClient->$database->Projects->find();  
+$projects = $mongoClient->$database->projects->find();  
 foreach ($projects as $project) {
   $modules = $mongoClient->$database->Modules->find(["enabled"=>true]);  
-  foreach ($modules as $module) {
-    $page=0;   
-
+  foreach ($modules as $module) { 
+    $project->page = 0;
     $project->name = str_replace("Seguimiento ", "", $project->name);
     $project->name = str_replace(" Peninsula", "", $project->name);
     $collectionName = "$project->name - $module->name";
