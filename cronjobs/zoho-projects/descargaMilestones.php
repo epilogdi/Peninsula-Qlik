@@ -13,8 +13,7 @@ include "$path/vendor/autoload.php";
 include "$path/includes/mongo.php";
 include "$path/includes/zoho-projects.php";
 
-
-function storeCollection($project,$module){ 
+function storeModule($project,$module){ 
   global $mongoClient;
   global $database;
   global $ENV_ZOHO_PROJECTS_PORTAL_ID;
@@ -24,6 +23,7 @@ function storeCollection($project,$module){
     "Authorization" => "Zoho-oauthtoken $token->access_token"
   ];
   $url = "https://projectsapi.zoho.com/restapi/portal/$ENV_ZOHO_PROJECTS_PORTAL_ID/projects/$project->id/$module/?index=$project->page&range=200";
+  error_log($url);
   $request = new \GuzzleHttp\Psr7\Request("GET", $url, $headers);
 
   try {
@@ -31,15 +31,23 @@ function storeCollection($project,$module){
     $response = json_decode($response->getBody(),true);
     if($response){
       $records = $response[$module];
-      $collectionName = "$project->name - $module";
-      $mongoClient->$database->$collectionName->insertMany($records);
+      $records = array_map(function($x) {
+        return (object) $x;
+      }, $records);
+
+      foreach ($records as $record) {        
+        $record->projectName = $project->name;
+        $record->projectId = $project->id;
+      }
+
+      $mongoClient->$database->$module->insertMany($records);
       $project->page = $project->page + 200;
-      storeCollection($project,$module);
+      storeModule($project,$module);
     }
 
   } catch (Exception $e) {
 
-    error_log("Caught exception:". $e->getMessage());
+    echo "Caught exception:". $e->getMessage();
   }
 
 }
@@ -47,22 +55,18 @@ function storeCollection($project,$module){
 $database = "ZohoProjects";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
+$module = "milestones";
 
 $projects = $mongoClient->$database->projects->find();  
+$mongoClient->$database->$module->drop();
 foreach ($projects as $project) {
-  $modules = $mongoClient->$database->Modules->find(["enabled"=>true]);  
-  foreach ($modules as $module) { 
-    $project->page = 0;
-    $project->name = str_replace("Seguimiento ", "", $project->name);
-    $project->name = str_replace(" Peninsula", "", $project->name);
-    $collectionName = "$project->name - $module->name";
-    $mongoClient->$database->$collectionName->drop();
-    storeCollection($project,$module->name);
-  }  
+  $project->page=0;  
+  storeModule($project,$module);
 }
 
+
 $cron = new stdClass(); 
-$cron->type="Descarga";
+$cron->type="Descarga Tareas";
 $cron->minutes=(microtime(true) - $start)/60;
 $cron->startUTC=$dateStart;
 $cron->endUTC=date('Y-m-d H:i:s');
