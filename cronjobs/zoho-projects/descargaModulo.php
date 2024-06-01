@@ -46,7 +46,7 @@ function storeModule($project){
 
 }
 
-$database = "ZohoProjectsX";
+$database = "ZohoProjects";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
