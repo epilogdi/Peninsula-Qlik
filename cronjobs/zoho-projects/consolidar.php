@@ -104,7 +104,7 @@ $mongoClient->$database->$module->aggregate(
   ]
 );
 
-//$mongoClient->$database->tasks->drop();
+$mongoClient->$database->tasks->drop();
 
 $cron = new stdClass(); 
 $cron->type="Consolidar Tareas";
