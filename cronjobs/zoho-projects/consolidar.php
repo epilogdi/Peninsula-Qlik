@@ -13,7 +13,7 @@ include "$path/vendor/autoload.php";
 include "$path/includes/mongo.php";
 include "$path/includes/zoho-projects.php";
 
-$database = "ZohoProjectsX";
+$database = "ZohoProjects";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
