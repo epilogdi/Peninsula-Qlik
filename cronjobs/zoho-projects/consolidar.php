@@ -89,7 +89,7 @@ $mongoClient->$database->$module->aggregate(
       '_Subpartida Presupuestal' => [ '$ifNull'  => [ '$customFields._Subpartida Presupuestal', null ]],
       '_Requerimiento' => [ '$ifNull'  => [ '$customFields._Requerimiento', null ]],
       '_Monto Pedido' => [ '$ifNull'  => [ '$customFields._Monto Pedido', null ]],
-      '_Pagaré SI / NO' => [ '$ifNull'  => [ '$customFields._Pagaré SI / NO', null ]],
+      '_Pagaré SI / NO' => [ '$ifNull'  => [ '$customFields._Pagaré SI / NO', null ]], 
       '_Obstrucción' => [ '$ifNull'  => [ '$customFields._Obstrucción', null ]],
       '_Contratistas' => [ '$ifNull'  => [ '$customFields._Contratistas', null ]],
       '_Autorizado Control Presupuestal' => [ '$ifNull'  => [ '$customFields._Autorizado Control Presupuestal', null ]],
