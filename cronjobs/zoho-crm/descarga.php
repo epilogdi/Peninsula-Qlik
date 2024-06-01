@@ -13,28 +13,29 @@ include "$path/vendor/autoload.php";
 include "$path/includes/mongo.php";
 include "$path/includes/zoho-crm.php";
 
-function storeCollection($collectionName){ 
+function storeCollection($obj){ 
   global $mongoClient;
   global $database;
-  global $page;
+  
+  $modulo = $obj->name;
   $client = new GuzzleHttp\Client();
   $token = getLastValidToken();
   $headers = [
     "Authorization" => "Zoho-oauthtoken $token->access_token"
   ];
-  $request = new \GuzzleHttp\Psr7\Request("GET", "https://www.zohoapis.com/crm/v2/$collectionName?page=$page", $headers);
+  $request = new \GuzzleHttp\Psr7\Request("GET", "https://www.zohoapis.com/crm/v2/$modulo?page=$obj->page", $headers);
 
   try {
     $response = $client->sendAsync($request)->wait();
     $response = json_decode($response->getBody());
     $records = (property_exists($response, 'users'))?$response->users:$response->data;
-    $mongoClient->$database->$collectionName->insertMany($records);
+    $obj->records += count($records);
+    $mongoClient->$database->$modulo->insertMany($records);
     if($response->info->more_records==true){   
-      $page++;
-      storeCollection($collectionName);
+      $obj->page ++;
+      storeCollection($obj);
     }
   } catch (Exception $e) {
-    
     error_log("Caught exception:". $e->getMessage());
   }
 
@@ -44,19 +45,27 @@ $database = "ZohoCRM";
 $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
-$collections = $mongoClient->$database->Modules->find(["enabled"=>true]);  
-foreach ($collections as $collection) {
-  $page=1;
-  $collectionName = $collection->name;
-  $mongoClient->$database->$collectionName->drop();
-  storeCollection($collectionName);
-}
+if(isset($_GET["modulo"]) && !empty($_GET["modulo"])){
+  $modulo = $_GET["modulo"];
+}else{
+  $modulo = explode("=", $_SERVER['argv'][1])[1];
+} 
+
+$obj = new stdClass();
+$obj->name = $modulo;
+$obj->page = 0;
+$obj->records = 0;
+
+$mongoClient->$database->$modulo->drop();
+storeCollection($obj);
+
 
 $cron = new stdClass();
-$cron->type="Descarga";
-$cron->minutes=(microtime(true) - $start)/60;
-$cron->startUTC=$dateStart;
-$cron->endUTC=date('Y-m-d H:i:s');
+$cron->type = "Descarga $modulo";
+$cron->records = $obj->records;
+$cron->minutes = (microtime(true) - $start)/60;
+$cron->startUTC = $dateStart;
+$cron->endUTC = date('Y-m-d H:i:s');
 
 $mongoClient->$database->Cronjobs->insertOne($cron);
 
