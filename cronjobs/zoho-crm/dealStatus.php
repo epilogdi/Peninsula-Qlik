@@ -67,7 +67,7 @@ function getTimeline($id){
   $headers = [
     "Authorization" => "Zoho-oauthtoken $token->access_token"
   ];
-  $request = new \GuzzleHttp\Psr7\Request("GET", "https://www.zohoapis.com/crm/v5/Deals/$id/__timeline", $headers);
+  $request = new \GuzzleHttp\Psr7\Request("GET", "https://www.zohoapis.com/crm/v6/Deals/$id/__timeline", $headers);
 
   try {
     $response = $client->sendAsync($request)->wait();
