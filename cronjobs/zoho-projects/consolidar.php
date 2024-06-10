@@ -62,6 +62,7 @@ $mongoClient->$database->$module->aggregate(
       'name' => '$name',
       'milestone_id' => '$milestone_id',
       'created_time' => '$created_time',
+      'created_by' => '$created_by',
       'end_date' => '$end_date',
       'completed_time' => '$completed_time',
       'priority' => '$priority',
