@@ -107,18 +107,18 @@ foreach ($elements as $element) {
   //$encontrado = $mongoClient->$database->DealStatusControl->findOne(['dealId' => $element->id]);
   //if(!$encontrado){
     $timeline = getTimeline($element->id);
-    //$obj = new stdClass();
-    //$obj->dealId = $element->id;
+    $obj = new stdClass();
+    $obj->dealId = $element->id;
     //$obj->lastStatus = $element->Stage;
     //$obj->cerrado = (str_contains(strtolower($element->Stage), 'cerrado') || str_contains(strtolower($element->Stage), 'cancelado')) ? true : false;
-    //$obj->respuesta = false;
+    $obj->respuesta = false;
     if(sizeof($timeline)>0){
       $mongoClient->$database->DealStatusTimeline->deleteMany(['dealId' => $element->id]);
       $mongoClient->$database->DealStatusTimeline->insertMany($timeline);
-      //$obj->respuesta = true;
+      $obj->respuesta = true;
     }
-    //$mongoClient->$database->DealStatusControl->deleteOne(['dealId' => $element->id]);
-    //$mongoClient->$database->DealStatusControl->insertOne($obj);
+    $mongoClient->$database->DealStatusControl->deleteOne(['dealId' => $element->id]);
+    $mongoClient->$database->DealStatusControl->insertOne($obj);
 
   //}
 }

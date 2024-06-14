@@ -106,18 +106,18 @@ foreach ($elements as $element) {
   //$encontrado = $mongoClient->$database->LeadStatusControl->findOne(['leadId' => $element->id]);
   //if(!$encontrado){
     $timeline = getTimeline($element->id);
-    //$obj = new stdClass();
-    //$obj->leadId = $element->id;
+    $obj = new stdClass();
+    $obj->leadId = $element->id;
     //$obj->lastStatus = $element->Lead_Status;
     //$obj->cerrado = (str_contains(strtolower($element->Lead_Status), 'cerrado') || str_contains(strtolower($element->Lead_Status), 'cancelado')) ? true : false;
-    //$obj->respuesta = false;
+    $obj->respuesta = false;
     if(sizeof($timeline)>0){
       $mongoClient->$database->LeadStatusTimeline->deleteMany(['leadId' => $element->id]);
       $mongoClient->$database->LeadStatusTimeline->insertMany($timeline);
-      //$obj->respuesta = true;
+      $obj->respuesta = true;
     }
-    //$mongoClient->$database->LeadStatusControl->deleteOne(['leadId' => $element->id]);
-    //$mongoClient->$database->LeadStatusControl->insertOne($obj);
+    $mongoClient->$database->LeadStatusControl->deleteOne(['leadId' => $element->id]);
+    $mongoClient->$database->LeadStatusControl->insertOne($obj);
   //}
 }
 
