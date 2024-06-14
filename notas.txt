@@ -1,0 +1,7 @@
+Qué pasa despues de que se leen los archivos del ftp?
+Qué pasa si el archivo no esta en formato xlsx?
+Qué pasa si el archivo tiene más de una pestaña?
+Qué pasa si por error se sube un archivo a la carpeta que no es?
+Cómo deshacer el cargue de un archivo?
+Habrá que dejar un log del ftp?
+Qué rastro se debe dejar en los registros de mongo?
