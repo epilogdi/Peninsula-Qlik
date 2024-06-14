@@ -17,6 +17,7 @@
     "jenssegers/mongodb": "^4.1",
     "google/apiclient": "^2.0",
     "google/analytics-data": "^0.16.1",
-    "phpoffice/phpspreadsheet": "^2.1"
+    "phpoffice/phpspreadsheet": "^2.1",
+    "jstolpe/instagram-graph-api-php-sdk": "^1.0"
   }
 }
