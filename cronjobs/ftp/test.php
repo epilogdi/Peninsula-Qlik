@@ -37,7 +37,7 @@ function loopFiles($directory){
 
 function excelToMongo($file){
   global $mongoClient;
-  
+
   $worksheet = $file->content->getActiveSheet();
   $rows = $worksheet->toArray();
 
@@ -65,11 +65,10 @@ function excelToMongo($file){
 
   $database = $file->database;
   $collection = $file->collection;
+  $mongoClient->$database->$collection->drop();
   $mongoClient->$database->$collection->insertMany($objetos);
+  return true;
 }
-
-
-
 
 
 if($_SERVER["DOCUMENT_ROOT"]){
@@ -86,24 +85,7 @@ include "$path/includes/mongo.php";
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 $directory = '/home/peninsulaftp';
-
-/*$folders = loopFolders($directory);
-foreach ($folders as $folder) {
-  $files = loopFiles($folder->path);
-  foreach ($files as $file) {
-
-
-  }
-}*/
-
-/*$files = loopFiles('/home/peninsulaftp/ingresos');
-foreach ($files as $file) {
-  $spreadsheet = IOFactory::load($file->path);
-  excelToMongo($file,$spreadsheet);
-}*/
-//echo 'Current script owner: ' . get_current_user() . "<br>";
-
-$databases = loopFolders('/home/peninsulaftp');
+$databases = loopFolders($directory);
 foreach ($databases as $database) {
   echo "-".json_encode($database)."<br>";
   $collections = loopFolders($database->path);
@@ -117,7 +99,9 @@ foreach ($databases as $database) {
       $obj->collection = $collection->folder;
       $obj->path = $file->path;
       $obj->content = IOFactory::load($obj->path);
-      excelToMongo($obj);
+      if(excelToMongo($obj)){
+        unlink($file->path);
+      }
     }
   }
 }
