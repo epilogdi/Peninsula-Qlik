@@ -84,7 +84,7 @@ include "$path/vendor/autoload.php";
 include "$path/includes/mongo.php";
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-$directory = '/home/peninsulaftp';
+$directory = '/home/peninsula';
 $databases = loopFolders($directory);
 foreach ($databases as $database) {
   echo "-".json_encode($database)."<br>";
