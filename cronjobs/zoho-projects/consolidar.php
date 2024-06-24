@@ -18,7 +18,7 @@ $start = microtime(true);
 $dateStart = date('Y-m-d H:i:s');
 
 $module= "tasks";
-
+$mongoClient->$database->Tareas->drop();
 $mongoClient->$database->$module->aggregate(
   [
     ['$project' => [
