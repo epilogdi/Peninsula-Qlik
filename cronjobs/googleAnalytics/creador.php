@@ -12,15 +12,20 @@ include "$path/environment.php";
 include "$path/vendor/autoload.php";
 include "$path/includes/mongo.php";
 
+$obj = new stdClass();
+$obj->nameAlias = $_GET["nameAlias"];
+$obj->viewId = intval($_GET["viewId"]);
+$obj->enabled = true;
 
-//$objetos = '[{"nameAlias": "AMANCAY","viewId": 277757220,"enabled": true},{"nameAlias": "BRELIA RESIDENCES","viewId": 397683474,"enabled": true},{"nameAlias": "CIMA PARK","viewId": 366147070,"enabled": true},{"nameAlias": "CITY TOWER","viewId": 365046012,"enabled": true},{"nameAlias": "GARIBALDI","viewId": 362175915,"enabled": true},{"nameAlias": "MARITIMA GOLF","viewId": 370853397,"enabled": true},{"nameAlias": "MARKETPLACE PENINSULA RESIDENCES","viewId": 355934330,"enabled": true},{"nameAlias": "MARKETPLACE PENINSULA RESIDENCES","viewId": 371103145,"enabled": true},{"nameAlias": "NEREA","viewId": 363112990,"enabled": true},{"nameAlias": "OCEAN ONE PUNTA DIAMANTE","viewId": 312344898,"enabled": true},{"nameAlias": "OCEAN ONE PUNTA DIAMANTE","viewId": 313243478,"enabled": true},{"nameAlias": "OCEANONE.MX","viewId": 363851452,"enabled": true},{"nameAlias": "PENINSULA RESIDENCE","viewId": 355932908,"enabled": true},{"nameAlias": "TIZATE RESIDENCES","viewId": 389756712,"enabled": true}]';
-//$objetos = file_get_contents('../../../controlDesarrollosGA.txt');
-//file_put_contents('../../../controlDesarrollosGA.txt', "");
-//
-$objetos = '[{"nameAlias": "Essentia","viewId": 444396849,"enabled": true},{"nameAlias": "Limu","viewId": 447663582,"enabled": true}]';
-$objetos = json_decode($objetos);
 $collection = "Control-Historico";
-$mongoClient->GoogleAnalytics->$collection->insertMany($objetos);
+$existe = $mongoClient->GoogleAnalytics->$collection->count(["viewId"=>$obj->viewId]);
+if($existe == 0){
+  $mongoClient->GoogleAnalytics->$collection->insertOne($obj);
+  echo "Se inserto el registro con éxito.";
+}else{
+   echo "El registro ya existe.";
+}
+
 
 
 ?>
