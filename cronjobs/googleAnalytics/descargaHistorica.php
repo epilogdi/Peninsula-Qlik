@@ -27,7 +27,10 @@ foreach ($projects as $project) {
     $mongoClient->$database->Descarga->insertMany($insert);
   }
   unset($a->_id);
-  $mongoClient->$database->$controlHistorico->deleteOne(["viewId"=>$project->viewId]); 
+  $mongoClient->$database->$controlHistorico->updateOne(
+    ["viewId"=>$project->viewId],
+    [ '$set' => [ 'enabled' => False ]]
+  );
   $mongoClient->$database->$controlDiario->insertOne($project);  
 }
 $cron = new stdClass();
