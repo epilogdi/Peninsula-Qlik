@@ -16,21 +16,22 @@ include "$path/includes/zoho-crm.php";
 function storeCollection($obj){ 
   global $mongoClient;
   global $database;
-  
-  $modulo = $obj->name;
+
+  $moduloZoho = $obj->name;
+  $moduloMongo = $obj->temp;
   $client = new GuzzleHttp\Client();
   $token = getLastValidToken();
   $headers = [
     "Authorization" => "Zoho-oauthtoken $token->access_token"
   ];
-  $request = new \GuzzleHttp\Psr7\Request("GET", "https://www.zohoapis.com/crm/v2/$modulo?page=$obj->page", $headers);
+  $request = new \GuzzleHttp\Psr7\Request("GET", "https://www.zohoapis.com/crm/v2/$moduloZoho?page=$obj->page", $headers);
 
   try {
     $response = $client->sendAsync($request)->wait();
     $response = json_decode($response->getBody());
     $records = (property_exists($response, 'users'))?$response->users:$response->data;
     $obj->records += count($records);
-    $mongoClient->$database->$modulo->insertMany($records);
+    $mongoClient->$database->$moduloMongo->insertMany($records);
     if($response->info->more_records==true){   
       $obj->page ++;
       storeCollection($obj);
@@ -51,14 +52,30 @@ if(isset($_GET["modulo"]) && !empty($_GET["modulo"])){
   $modulo = explode("=", $_SERVER['argv'][1])[1];
 } 
 
+$moduloOficial = $modulo;
+$moduloTemporal = "$modulo-TEMP";
+
 $obj = new stdClass();
-$obj->name = $modulo;
+$obj->name = $moduloOficial;
+$obj->temp = $moduloTemporal;
 $obj->page = 0;
 $obj->records = 0;
 
-$mongoClient->$database->$modulo->drop();
-storeCollection($obj);
+$mongoClient->$database->$moduloOficial->drop();
 
+storeCollection($obj);//se almacena en temporal
+
+$conteoTemp = $mongoClient->$database->$moduloTemporal->countDocuments();
+$conteoOficial = $mongoClient->$database->$moduloOficial->countDocuments();
+
+
+if($conteoTemp < $conteoOficial * 0.9){ //si los registros que se descargan son menores a los ya existentes
+  $mongoClient->$database->$moduloTemporal->drop();//se borra la colección temporal y se deja la ejecucion anterior
+}else{
+   $mongoClient->$database->$moduloOficial->drop();
+  $mongoClient->$database->$moduloTemporal->rename($modulo);
+ 
+}
 
 $cron = new stdClass();
 $cron->type = "Descarga $modulo";
