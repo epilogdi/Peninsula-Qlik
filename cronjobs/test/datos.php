@@ -21,7 +21,7 @@ foreach ($databases as $database) {
     echo "$db<br>";
     foreach ($collections as $collection) {
       $col=$collection["name"];
-      echo "----$col<br>";
+      echo "----<b>$col</b><br>";
       $elements = $mongoClient->$db->$col->aggregate([['$sample' => ['size' => 100]]]);
       $element = new stdClass();
       foreach ($elements as $temp) { 
