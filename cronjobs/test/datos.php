@@ -35,15 +35,15 @@ foreach ($databases as $database) {
 
       foreach ($element as $key=>$val) {        
         $type = gettype($val);
-        echo "--------$key => <b>$type</b><br>";
+        echo "--------$key       <b>$type</b><br>";
         if(is_object($val)){
           foreach ($val as $keyx=>$valx) { 
             $typex = gettype($valx);
-            echo "------------$keyx => <b>$typex</b><br>"; 
+            echo "------------$keyx       <b>$typex</b><br>"; 
             if(is_object($valx)){
               foreach ($valx as $keyxx=>$valxx) { 
                 $typexx = gettype($valxx);
-                echo "----------------$keyxx => <b>$typexx</b><br>"; 
+                echo "----------------$keyxx       <b>$typexx</b><br>"; 
               }
             }
           }          
