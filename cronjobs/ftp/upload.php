@@ -70,8 +70,8 @@ if (file_exists($directory)) {
   $obj->path = $directory;
   $obj->content = IOFactory::load($obj->path);
   if(readExcel($obj)){
-    //$mongoClient->$database->$collection->drop();
-    //unlink($obj->path);
+    $mongoClient->$database->$collection->drop();
+    unlink($obj->path);
   }
 }
 
