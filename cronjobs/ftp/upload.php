@@ -63,7 +63,7 @@ include "$path/includes/mongo.php";
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 $directory = "/home/peninsulaftp/$database/$collection/$collection.xlsx";
-if (file_exists($filename)) {
+if (file_exists($directory)) {
   $obj = new stdClass();
   $obj->database = $database;
   $obj->collection = $collection;
