@@ -18,7 +18,7 @@ function loopFolders($directory){
 }
 
 function loopFiles($directory){
-  $entries = scandir($directory);
+  $entries = preg_grep('/^([^.])/', scandir($directory));
   $files = array();
   foreach ($entries as $entry) {
     if ($entry !== '.' && $entry !== '..') {
@@ -37,7 +37,9 @@ function loopFiles($directory){
 
 function excelToMongo($file){
   global $mongoClient;
-
+  $database = $file->database;
+  $collection = $file->collection;
+  $mongoClient->$database->$collection->drop();
   $worksheet = $file->content->getActiveSheet();
   $rows = $worksheet->toArray();
 
@@ -56,18 +58,20 @@ function excelToMongo($file){
           $columna = str_replace(",", "", $columna);
           $columna = floatval($columna);
         }
-        $xx=$rotulos[$key];
-        $obj->$xx=$columna;      
+        if($rotulos[$key]!=""){
+          $xx=$rotulos[$key];
+          $obj->$xx=$columna;  
+        }
+
       }
       array_push($objetos, $obj);
     }
+    if(sizeof($objetos) == 500){
+      $mongoClient->$database->$collection->insertMany($objetos);
+      $objetos = array();
+    }
   }
-
-  $database = $file->database;
-  $collection = $file->collection;
-  $mongoClient->$database->$collection->drop();
   $mongoClient->$database->$collection->insertMany($objetos);
-  return true;
 }
 
 
@@ -88,22 +92,20 @@ $directory = '/home/rodrigo2/CARGUES';
 $databases = loopFolders($directory);
 foreach ($databases as $database) {
   echo "-".json_encode($database)."<br>";
-  $collections = loopFolders($database->path);
+  $collections = loopFiles($database->path);
   foreach ($collections as $collection) {
     echo "--".json_encode($collection)."<br>";
-    $files = loopFiles($collection->path);
-    foreach ($files as $file) {
-      echo "---".json_encode($file)."<br>";
-      $obj = new stdClass();
-      $obj->database = $database->folder;
-      $obj->collection = $collection->folder;
-      $obj->path = $file->path;
-      $obj->content = IOFactory::load($obj->path);
-      if(excelToMongo($obj)){
-        //unlink($file->path);
-      }
+    $obj = new stdClass();
+    $obj->database = $database->folder;
+    $obj->collection = explode(".", $collection->file)[0];
+    $obj->path = $collection->path;
+    echo "---".json_encode($obj)."<br>";
+    $obj->content = IOFactory::load($collection->path);
+    if(excelToMongo($obj)){
+      //unlink($file->path);
     }
   }
+
 }
 
 ?>
