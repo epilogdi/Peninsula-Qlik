@@ -72,6 +72,7 @@ function excelToMongo($file){
     }
   }
   $mongoClient->$database->$collection->insertMany($objetos);
+  return true;
 }
 
 
