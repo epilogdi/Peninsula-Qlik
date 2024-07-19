@@ -102,7 +102,7 @@ foreach ($databases as $database) {
     echo "---".json_encode($obj)."<br>";
     $obj->content = IOFactory::load($collection->path);
     if(excelToMongo($obj)){
-      unlink($obj->path);
+      unlink($obj->path); 
     }
   }
 
