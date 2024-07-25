@@ -26,7 +26,7 @@ $modulo="Pagos";
 $mongoClient->$database->$modulo->drop();
 
 $sql = "SELECT 
-	c.FechaEmision, 
+	CONVERT(VARCHAR(20),c.FechaEmision,103) as FechaEmision, 
 	p.Nombre, 
 	c.Referencia, 
 	c.Observaciones,
@@ -52,9 +52,10 @@ if ($stmt === false) {
 $objetos = array();
 while ($row = sqlsrv_fetch_object($stmt)) {
   $obj = new stdClass();
-  foreach ($row as $key => $value) {     
+  foreach ($row as $key => $value) { 
     $obj->$key = $value;
   }
+  echo json_encode($obj)."<br>";
   array_push($objetos, $obj);
   if(sizeof($objetos) == 500){
     $mongoClient->$database->Pagos->insertMany($objetos);
