@@ -45,20 +45,18 @@ if ($handle) {
           $columna = floatval($columna);
         }
         $xx = $rotulos[$key];
-        $obj->$xx = $columna; 
-        array_push($batch, $obj);
+        $obj->$xx = $columna;         
       }
-      if(sizeof($batch) == 500){
-        $mongoClient->$database->$collection->insertMany($batch);
-        $batch = array();
-      }
+      array_push($batch, $obj);      
     }
 
-
+    if(sizeof($batch) == 500){
+      $mongoClient->$database->$collection->insertMany($batch);
+      $batch = array();
+    }
     $contador ++;
   }
   $mongoClient->$database->$collection->insertMany($batch);
-
   fclose($handle);
 }
 
