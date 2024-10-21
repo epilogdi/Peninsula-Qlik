@@ -14,7 +14,7 @@ include "$path/includes/mongo.php";
 include "$path/includes/zoho-analytics.php";
 
 function extractCollection($obj){ 
-
+  error_log($obj->workspace);
 
   $client = new GuzzleHttp\Client();
   $token = getLastValidToken();
@@ -81,11 +81,17 @@ $obj = new stdClass();
 $moduloOficial;
 $moduloTemporal;
 $obj->workspace = 2464941000001334001;
+if($modulo == "Leads"){
+  $obj->view = 2464941000001334012; 
+}
 if($modulo == "LeadTimeline"){
-  $obj->view = 2464941000002610228; 
+  $obj->view = 2464941000001336253; 
+}
+if($modulo == "Deals"){
+  $obj->view = 2464941000001334015; 
 }
 if($modulo == "DealTimeline"){
-  $obj->view = 2464941000002612108; 
+  $obj->view = 2464941000002555003;
 }
 
 
