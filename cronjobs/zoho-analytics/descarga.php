@@ -91,7 +91,7 @@ if($modulo == "Deals"){
   $obj->view = 2464941000001334015; 
 }
 if($modulo == "DealTimeline"){
-  $obj->view = 2464941000002555003;
+  $obj->view = 2464941000002555003; 
 }
 
 
